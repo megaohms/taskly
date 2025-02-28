@@ -6,6 +6,8 @@ import { useState } from "react";
 type ShoppingListItemType = {
   id: string;
   name: string;
+  completedAt?: number;
+  updatedAt: number;
 };
 
 const initialList: ShoppingListItemType[] = [];
@@ -17,12 +19,31 @@ export default function Index() {
   const handleSubmit = () => {
     if (value) {
       const newShoppingList = [
-        { id: new Date().toISOString(), name: value },
+        { id: new Date().toISOString(), name: value, updatedAt: Date.now() },
         ...shoppingList,
       ];
       setShoppingList(newShoppingList);
       setValue("");
     }
+  };
+
+  const handleDelete = (id: string) => {
+    const newShoppingList = shoppingList.filter((item) => item.id !== id);
+    setShoppingList(newShoppingList);
+  };
+
+  const onToggleComplete = (id: string) => {
+    const newShoppingList = shoppingList.map((item) => {
+      if (item.id === id) {
+        return {
+          ...item,
+          completedAt: item.completedAt ? undefined : Date.now(),
+          updatedAt: Date.now(),
+        };
+      }
+      return item;
+    });
+    setShoppingList(newShoppingList);
   };
 
   return (
@@ -42,14 +63,43 @@ export default function Index() {
           <Text>Your shopping list is empty</Text>
         </View>
       }
+      data={orderShoppingList(shoppingList)}
       style={styles.container}
       contentContainerStyle={styles.contentContainer}
       stickyHeaderIndices={[0]}
       renderItem={({ item }) => (
-        <ShoppingListItem key={item.id} name={item.name} />
+        <ShoppingListItem
+          key={item.id}
+          name={item.name}
+          onDelete={() => handleDelete(item.id)}
+          onToggleComplete={() => onToggleComplete(item.id)}
+          isCompleted={!!item.completedAt}
+        />
       )}
     ></FlatList>
   );
+}
+
+function orderShoppingList(shoppingList: ShoppingListItemType[]) {
+  return shoppingList.sort((item1, item2) => {
+    if (item1.completedAt && item2.completedAt) {
+      return item2.completedAt - item1.completedAt;
+    }
+
+    if (item1.completedAt && !item2.completedAt) {
+      return 1;
+    }
+
+    if (!item1.completedAt && item2.completedAt) {
+      return -1;
+    }
+
+    if (!item1.completedAt && !item2.completedAt) {
+      return item2.updatedAt - item1.updatedAt;
+    }
+
+    return 0;
+  });
 }
 
 const styles = StyleSheet.create({
