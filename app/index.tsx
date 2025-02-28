@@ -1,7 +1,10 @@
 import { FlatList, StyleSheet, Text, TextInput, View } from "react-native";
 import { theme } from "../theme";
 import { ShoppingListItem } from "../components/ShoppingListItem";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { getFromStorage } from "../utils/storage";
+
+const storageKey = "shopping-list";
 
 type ShoppingListItemType = {
   id: string;
@@ -15,6 +18,17 @@ const initialList: ShoppingListItemType[] = [];
 export default function Index() {
   const [shoppingList, setShoppingList] = useState(initialList);
   const [value, setValue] = useState<string>("");
+
+  useEffect(() => {
+    const fetchInitial = async () => {
+      const data = await getFromStorage(storageKey);
+      if (data) {
+        setShoppingList(data);
+      }
+    };
+
+    fetchInitial();
+  }, []);
 
   const handleSubmit = () => {
     if (value) {
