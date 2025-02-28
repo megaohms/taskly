@@ -2,7 +2,7 @@ import { FlatList, StyleSheet, Text, TextInput, View } from "react-native";
 import { theme } from "../theme";
 import { ShoppingListItem } from "../components/ShoppingListItem";
 import { useEffect, useState } from "react";
-import { getFromStorage } from "../utils/storage";
+import { getFromStorage, saveToStorage } from "../utils/storage";
 
 const storageKey = "shopping-list";
 
@@ -37,6 +37,7 @@ export default function Index() {
         ...shoppingList,
       ];
       setShoppingList(newShoppingList);
+      saveToStorage(storageKey, newShoppingList);
       setValue("");
     }
   };
@@ -44,6 +45,7 @@ export default function Index() {
   const handleDelete = (id: string) => {
     const newShoppingList = shoppingList.filter((item) => item.id !== id);
     setShoppingList(newShoppingList);
+    saveToStorage(storageKey, newShoppingList);
   };
 
   const onToggleComplete = (id: string) => {
@@ -58,6 +60,7 @@ export default function Index() {
       return item;
     });
     setShoppingList(newShoppingList);
+    saveToStorage(storageKey, newShoppingList);
   };
 
   return (
